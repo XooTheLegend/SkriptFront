@@ -26,7 +26,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/AddNews.vue')
   },
   {
-    path: '/preview-news',
+    path: '/preview-news/:id',
     name: 'PreviewNews',
     component: () => import(/* webpackChunkName: "about" */ '../views/PreviewNews.vue')
   },
@@ -39,6 +39,21 @@ const routes = [
     path: '/edit-user/:id',
     name: 'EditUser',
     component: () => import(/* webpackChunkName: "about" */ '../views/EditUser.vue')
+  },
+  {
+    path: '/edit-news/:id',
+    name: 'EditNews',
+    component: () => import(/* webpackChunkName: "about" */ '../views/EditNews.vue')
+  },
+  {
+    path: '/add-comment/:id',
+    name: 'AddComment',
+    component: () => import(/* webpackChunkName: "about" */ '../views/AddComment.vue')
+  },
+  {
+    path:'*',
+    name:'PageNotFound',
+    component: () => import(/* webpackChunkName: "about" */ '../views/PageNotFound.vue')
   }
 
 ]

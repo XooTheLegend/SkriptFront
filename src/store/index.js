@@ -6,9 +6,19 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     users:[],
-    news:[]
+    news:[],
+    comments:[]
   },
   mutations: {
+
+    set_comments: function(state, comments){
+      state.comments = comments;
+    },
+
+    add_comment: function(state, comment){
+      state.comments.push(comment);
+    },
+
     set_users: function(state, users){
       state.users = users;
     },
@@ -25,17 +35,14 @@ export default new Vuex.Store({
         }
       }
     },
-    find_user: function(){
-
-    },
     update_user: function(state, payload){
       for(let t = 0; t < state.users.length; t++){
-        if(state.users[t].id === payload.id){
-          state.users[t].email = payload.msg.email;
-          state.users[t].password = payload.msg.password;
-          state.users[t].tip = payload.msg.tip;
-          state.users[t].name = payload.msg.name;
-          state.users[t].surname = payload.msg.surname;
+        if(state.users[t].id === JSON.parse(payload.id)){
+          state.users[t].email = payload.user.email;
+          state.users[t].password = payload.user.password;
+          state.users[t].tip = payload.user.tip;
+          state.users[t].name = payload.user.name;
+          state.users[t].surname = payload.user.surname;
           break;
         }
       }
@@ -50,7 +57,7 @@ export default new Vuex.Store({
     },
 
     remove_news: function(state, id){
-      for(let t = 0; t < state.users.length; t++){
+      for(let t = 0; t < state.news.length; t++){
         if(state.news[t].id === id){
           state.news.splice(t,1);
           break;
@@ -59,20 +66,65 @@ export default new Vuex.Store({
     },
 
     update_news: function(state, payload){
-      for(let t = 0; t < state.users.length; t++){
-        if(state.news[t].id === payload.id){
-          state.news[t].author = payload.msg.author;
-          state.news[t].title = payload.msg.title;
-          state.news[t].content = payload.msg.content;
+      for(let t = 0; t < state.news.length; t++){
+        if(state.news[t].id === JSON.parse(payload.id)){
+          state.news[t].author = payload.news.author;
+          state.news[t].title = payload.news.title;
+          state.news[t].content = payload.news.content;
+          state.news[t].category = payload.news.category;
           break;
         }
       }
-    },
-
+    }
   },
   actions: {
+
+    load_comments:function({commit}, id){
+        fetch(`http://localhost:8080/api/comment/${id}`, {method: 'get'}).then((response)=>{
+          if(!response.ok)
+            throw response;
+          return response.json()
+        }).then((jsonData)=>{
+          commit('set_comments', jsonData);
+        }).catch((error) => {
+          if (typeof error.text === 'function')
+            error.text().then((errorMessage) => {
+              alert(errorMessage);
+            });
+          else
+            alert(error);
+        });
+    },
+
+    new_comment:function({commit}, comment){
+      fetch('http://localhost:8080/api/comments', {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: comment
+      }).then((response)=>{
+        if (!response.ok)
+          throw response;
+
+        return response.json();
+      }).then((jsonData) => {
+        commit('add_comment', jsonData);
+      }).catch((error) => {
+        if (typeof error.text === 'function')
+          error.text().then((errorMessage) => {
+            alert(errorMessage + " error msg");
+          });
+        else
+          alert(error + " error");
+      });
+    },
+
     load_users: function({commit}){
-      fetch('http://localhost:8080/api/users', { method: 'get' }).then((response) => {
+      fetch('http://localhost:8080/api/users', { method: 'get',
+      headers:{
+        Authorization: 'Bearer ' + localStorage.getItem('jwt')
+      }}).then((response) => {
         if (!response.ok)
           throw response;
 
@@ -82,7 +134,7 @@ export default new Vuex.Store({
       }).catch((error) => {
         if (typeof error.text === 'function')
           error.text().then((errorMessage) => {
-            alert(errorMessage);
+            alert(errorMessage + " xd");
           });
         else
           alert(error);
@@ -90,7 +142,10 @@ export default new Vuex.Store({
     },
 
     delete_user: function({commit}, id){
-      fetch(`http://localhost:8080/api/user/${id}`, { method: 'delete' }).then((response) => {
+      fetch(`http://localhost:8080/api/user/${id}`, { method: 'delete',
+        headers:{
+          Authorization: 'Bearer ' + localStorage.getItem('jwt')
+        }}).then((response) => {
         if (!response.ok)
           throw response;
 
@@ -111,7 +166,8 @@ export default new Vuex.Store({
       fetch('http://localhost:8080/api/users', {
         method: 'post',
         headers: {
-          'Content-Type' : 'application/json'
+          'Content-Type' : 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('jwt')
         },
         body: user
       }).then((response) => {
@@ -135,7 +191,8 @@ export default new Vuex.Store({
       fetch(`http://localhost:8080/api/user/${payload.id}`, {
         method: 'put',
         headers: {
-          'Content-Type' : 'application/json'
+          'Content-Type' : 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('jwt')
         },
         body: payload.user
       }).then((response) => {
@@ -174,7 +231,10 @@ export default new Vuex.Store({
     },
 
     delete_news: function({commit}, id){
-      fetch(`http://localhost:8080/api/new/${id}`, { method: 'delete' }).then((response) => {
+      fetch(`http://localhost:8080/api/new/${id}`, { method: 'delete',
+        headers:{
+          Authorization: 'Bearer ' + localStorage.getItem('jwt')
+        }}).then((response) => {
         if (!response.ok)
           throw response;
 
@@ -195,7 +255,8 @@ export default new Vuex.Store({
       fetch('http://localhost:8080/api/news', {
         method: 'post',
         headers: {
-          'Content-Type' : 'application/json'
+          'Content-Type' : 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('jwt')
         },
         body: news
       }).then((response) => {
@@ -216,10 +277,11 @@ export default new Vuex.Store({
     },
 
     change_news: function({commit}, payload){
-      fetch(`http://localhost:8080/api/user/${payload.id}`, {
+      fetch(`http://localhost:8080/api/new/${payload.id}`, {
         method: 'put',
         headers: {
-          'Content-Type' : 'application/json'
+          'Content-Type' : 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('jwt')
         },
         body: payload.news
       }).then((response) => {
@@ -239,7 +301,5 @@ export default new Vuex.Store({
       });
     }
 
-  },
-  modules: {
   }
 })

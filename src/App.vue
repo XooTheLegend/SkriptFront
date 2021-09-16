@@ -1,13 +1,47 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/login">Login</router-link> |
-      <router-link to="/admin">Admin</router-link>
-    </div>
-    <router-view/>
+    <Header/>
   </div>
 </template>
+
+<script>
+import {mapActions} from 'vuex';
+import Header from "@/components/Header";
+export default{
+  name:'App',
+  components: {Header},
+  methods:  {
+    //...mapActions(['load_users']),
+    ...mapActions(['load_news'])
+  },
+  mounted(){
+    //this.load_users();
+    this.load_news();
+
+    fetch('http://localhost:8080/cookie',{method:'get'}).then((response)=>{
+        if(!response.ok)
+          throw response;
+
+        return response.json();
+    }).then((data)=>{
+        if(localStorage.getItem('cookie') ==='' || localStorage.getItem('cookie')===null){
+          localStorage.setItem('cookie',data.cookie);
+        }
+    }).catch((error) => {
+      if (typeof error.text === 'function')
+        error.text().then((errorMessage) => {
+          alert(errorMessage);
+        });
+      else
+        alert(error);
+    });
+
+  }
+
+}
+
+
+</script>
 
 <style>
 #app {

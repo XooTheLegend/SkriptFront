@@ -38,6 +38,7 @@
 
 <script>
 import { mapActions} from 'vuex';
+import * as VueJwtDecode from "jsonwebtoken";
 export default {
   name: "NewUser",
   data(){
@@ -53,25 +54,93 @@ export default {
   },
   methods:{
     ...mapActions(['new_user']),
-    back(){
-      var data = {
-        email:this.email,
-        password:this.password,
-        tip:this.tip,
-        name:this.name,
-        surname:this.surname
+    validate(){
+      if(this.email ==='' || this.email===null){
+        alert('email field is required!');
+        return false;
       }
-      data = JSON.stringify(data)
+
+      if(this.password ==='' || this.password===null){
+        alert('password field is required!');
+        return false;
+      }
+
+      if(this.tip ==='' || this.tip===null){
+        alert('tip field is required!');
+        return false;
+      }
+
+      if(this.name ==='' || this.name===null){
+        alert('name field is required!');
+        return false;
+      }
+
+      if(this.surname ==='' || this.surname===null){
+        alert('surname field is required!');
+        return false;
+      }
+
+      if(this.email.length < 4 && this.email.length>20){
+        alert('email must be between 4 and 20 characters long!')
+        return false;
+      }
+
+      if(this.password.length < 8 && this.password.length>100){
+        alert('password must be between 8 and 100 characters long!')
+        return false;
+      }
+
+      if(this.tip.length < 2 && this.tip.length>20){
+        alert('tip must be between 2 and 20 characters long!')
+        return false;
+      }
+
+      if(this.name.length < 4 && this.name.length>20){
+        alert('name must be between 4 and 20 characters long!')
+        return false;
+      }
+
+      if(this.surname.length < 4 && this.surname.length>20){
+        alert('surname must be between 4 and 20 characters long!')
+        return false;
+      }
+      return true;
+    },
+    back(){
+      if(!this.validate()){
+        return;
+      }
+      const data = JSON.stringify({
+        email: this.email,
+        password: this.password,
+        tip: this.tip,
+        name: this.name,
+        surname: this.surname
+      });
+
       if(this.password === this.repeatedPassword){
         this.new_user(data).then(()=>{
           this.$router.push({name:"Admin"})
-        }).catch(e => {
-          console.log(e);
-          alert("Vec postoji korisnik sa tim emailom")
         });
       } else {
         alert("Password's doesn't match!");
       }
+    }
+  },
+  beforeRouteEnter(to,from,next) {
+    const jwt = localStorage.getItem('jwt')
+    try{
+      let decoded = VueJwtDecode.decode(jwt)
+      if(decoded.user.tip==='ADMIN'){
+        console.log('ADMIN JE')
+        next();
+      }else{
+        console.log('NIJE ADMIN')
+        next({name:"Home"})
+      }
+    } catch(error){
+      console.log(error, 'error from decoding jwt')
+      next({name:"Home"})
     }
   }
 }

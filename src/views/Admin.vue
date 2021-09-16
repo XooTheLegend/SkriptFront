@@ -17,15 +17,18 @@
 </template>
 
 <script>
-import {mapState, mapActions} from 'vuex';
+import {mapActions} from 'vuex';
+import * as VueJwtDecode from "jsonwebtoken";
 export default {
   name: "Admin",
   computed:{
-    ...mapState(['users'])
+    users(){
+      return this.$store.state.users;
+    }
   },
   data(){
     return {
-      fields:["email", "password", "tip", "name", "surname", "actions"]
+      fields:["email", "password", "tip", "name", "surname", "actions"],
     }
   },
 
@@ -41,6 +44,22 @@ export default {
   },
   mounted(){
     this.load_users();
+  },
+  beforeRouteEnter(to,from,next) {
+    const jwt = localStorage.getItem('jwt')
+    try{
+      let decoded = VueJwtDecode.decode(jwt)
+      if(decoded.user.tip==='ADMIN'){
+        console.log('ADMIN JE')
+        next();
+      }else{
+        console.log('NIJE ADMIN')
+        next({name:"Home"})
+      }
+    } catch(error){
+      console.log(error, 'error from decoding jwt')
+      next({name:"Home"})
+    }
   }
 }
 </script>
